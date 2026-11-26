@@ -3,7 +3,7 @@
 // Para cambiar un reto o una frase, edita el objeto correspondiente en "sorpresas".
 
 const ANIO = 2026;
-const MES = 11; // JavaScript cuenta enero como 0 y diciembre como 11.
+const MES = 10; // JavaScript cuenta enero como 0 y diciembre como 11.
 const HORA_APERTURA = 0;
 
 const sorpresas = [

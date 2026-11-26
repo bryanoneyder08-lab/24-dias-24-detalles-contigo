@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#10251e">
+  <title>Para Oney | 24 días para sonreír</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="top-garland" aria-hidden="true">✦　❄　✦　❄　✦</div>
+
+  <header class="hero">
+    <p class="eyebrow">UNA PEQUEÑA SORPRESA PARA TI</p>
+    <div class="hero-star" aria-hidden="true">✧</div>
+    <h1>Para Oney <span>❤️</span></h1>
+    <p class="subtitle">24 días, 24 detalles y un deseo: verte sonreír.</p>
+    <div class="date-pill" id="today-date">Diciembre 2026</div>
+    <p class="countdown" id="countdown" aria-live="polite">Cada sorpresa llega a su tiempo…</p>
+  </header>
+
+  <main>
+    <section class="intro">
+      <div class="intro-icon" aria-hidden="true">🎄</div>
+      <p class="section-kicker">NUESTRO CALENDARIO DE ADVIENTO</p>
+      <h2>Un día a la vez</h2>
+      <p>Preparé estas pequeñas sorpresas pensando en ti. Algunas son retos, otras son palabras que quiero que recuerdes. No hay prisa: disfruta cada día.</p>
+    </section>
+
+    <section class="calendar-wrap" aria-label="Calendario de Adviento">
+      <div id="calendar" class="calendar"></div>
+    </section>
+
+    <section class="closing-note">
+      <span class="note-flourish" aria-hidden="true">✧</span>
+      <p>La distancia no impide tener detalles, compartir sonrisas ni construir algo bonito.</p>
+      <span class="note-signature">Con mucho cariño ❤️</span>
+    </section>
+  </main>
+
+  <footer>
+    <p>Hecho especialmente para Oney</p>
+    <p class="footer-small">Que cada día te recuerde lo especial que eres.</p>
+  </footer>
+
+  <div class="modal" id="surprise-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
+    <div class="modal-card">
+      <button class="close-modal" id="close-modal" type="button" aria-label="Cerrar">×</button>
+      <div class="modal-snow" aria-hidden="true">❄</div>
+      <div class="modal-emoji" id="modal-emoji">❤️</div>
+      <p class="modal-day" id="modal-day">DÍA 1 · DICIEMBRE</p>
+      <h2 id="modal-title"></h2>
+      <p class="modal-message" id="modal-message"></p>
+      <button class="modal-button" id="modal-done" type="button">Guardar este momento ❤️</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

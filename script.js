@@ -2,9 +2,8 @@
 // Diciembre de 2026 · Se abre cada día a las 00:00 (hora local del dispositivo).
 // Para cambiar un reto o una frase, edita el objeto correspondiente en "sorpresas".
 
-const ANIO = 2026;
-const MES = 11; // JavaScript cuenta enero como 0 y diciembre como 11.
-const HORA_APERTURA = 0;
+const FECHA_INICIAL = new Date(2026, 11, 1, 0, 0, 0, 0);
+const INTERVALO_DIAS_MS = 24 * 60 * 60 * 1000;
 
 const sorpresas = [
   {
@@ -105,108 +104,255 @@ const sorpresas = [
   }
 ];
 
+// ==========================================
+// ELEMENTOS HTML
+// ==========================================
+
 const calendar = document.getElementById("calendar");
 const modal = document.getElementById("surprise-modal");
 const countdown = document.getElementById("countdown");
 
-function fechaDeApertura(dia) {
-  return new Date(ANIO, MES, dia, HORA_APERTURA, 0, 0, 0);
+// ==========================================
+// SISTEMA DE DESBLOQUEO CADA 24 HORAS
+// ==========================================
+
+function obtenerFecha(dia) {
+  return new Date(
+    FECHA_INICIAL.getTime() +
+    (dia - 1) * INTERVALO_DIAS_MS
+  );
 }
 
-function estaDisponible(dia, ahora = new Date()) {
-  return ahora.getTime() >= fechaDeApertura(dia).getTime();
+function estaDesbloqueado(dia) {
+  return new Date().getTime() >= obtenerFecha(dia).getTime();
 }
+
+// ==========================================
+// GENERAR LAS 24 CASILLAS
+// ==========================================
 
 function crearCalendario() {
+
   calendar.innerHTML = "";
 
   for (let dia = 1; dia <= 24; dia++) {
-    const disponible = estaDisponible(dia);
-    const tarjeta = document.createElement("button");
-    tarjeta.type = "button";
-    tarjeta.className = `day ${disponible ? "opened" : "locked"}`;
-    tarjeta.disabled = !disponible;
-    tarjeta.setAttribute("aria-label",
-      disponible ? `Abrir sorpresa del día ${dia}` : `Día ${dia}, todavía cerrado`);
 
-    const icono = disponible ? (sorpresas[dia - 1].tipo === "reto" ? "🎁" : "💌") : "🔒";
+    const disponible = estaDesbloqueado(dia);
+
+    const tarjeta = document.createElement("button");
+
+    tarjeta.type = "button";
+
+    tarjeta.className = `day ${
+      disponible ? "opened" : "locked"
+    }`;
+
+    tarjeta.disabled = !disponible;
+
+    tarjeta.setAttribute(
+      "aria-label",
+      disponible
+        ? `Abrir sorpresa del día ${dia}`
+        : `Día ${dia}, todavía cerrado`
+    );
+
+    const icono = disponible
+      ? (sorpresas[dia - 1].tipo === "reto" ? "🎁" : "💌")
+      : "🔒";
+
     tarjeta.innerHTML = `
       <span class="day-number">${dia}</span>
-      <span class="day-icon" aria-hidden="true">${icono}</span>
-      <span class="day-status">${disponible ? "Abrir sorpresa" : "Próximamente"}</span>
+
+      <span class="day-icon">${icono}</span>
+
+      <span class="day-status">
+        ${disponible ? "Abrir sorpresa" : "Próximamente"}
+      </span>
     `;
 
     if (disponible) {
-      tarjeta.addEventListener("click", () => abrirSorpresa(dia));
+
+      tarjeta.addEventListener("click", () => {
+        abrirSorpresa(dia);
+      });
+
     }
+
     calendar.appendChild(tarjeta);
+
   }
+
 }
+
+// ==========================================
+// ABRIR UNA SORPRESA
+// ==========================================
 
 function abrirSorpresa(dia) {
-  // Comprobación adicional para que una casilla futura no se pueda abrir.
-  if (!estaDisponible(dia)) return;
 
-  const sorpresa = sorpresas[dia - 1];
-  document.getElementById("modal-emoji").textContent = sorpresa.emoji;
-  document.getElementById("modal-day").textContent = `DÍA ${dia} · DICIEMBRE`;
-  document.getElementById("modal-title").textContent = sorpresa.titulo;
-  document.getElementById("modal-message").textContent = sorpresa.mensaje;
+  // Evita abrir días que todavía no corresponden.
 
-  modal.classList.add("show");
-  modal.setAttribute("aria-hidden", "false");
-  document.getElementById("close-modal").focus();
-}
-
-function cerrarModal() {
-  modal.classList.remove("show");
-  modal.setAttribute("aria-hidden", "true");
-}
-
-function actualizarFechaYContador() {
-  const ahora = new Date();
-  document.getElementById("today-date").textContent =
-    ahora.toLocaleDateString("es-NI", {
-      day: "numeric", month: "long", year: "numeric"
-    });
-
-  let siguiente = null;
-  for (let dia = 1; dia <= 24; dia++) {
-    if (!estaDisponible(dia, ahora)) {
-      siguiente = fechaDeApertura(dia);
-      break;
-    }
-  }
-
-  if (!siguiente) {
-    countdown.textContent = "¡Todas las sorpresas están abiertas! Feliz Navidad, Oney ❤️";
+  if (!estaDesbloqueado(dia)) {
     return;
   }
 
-  const diferencia = Math.max(0, siguiente.getTime() - ahora.getTime());
-  const dias = Math.floor(diferencia / 86400000);
-  const horas = Math.floor((diferencia % 86400000) / 3600000);
-  const minutos = Math.floor((diferencia % 3600000) / 60000);
-  const segundos = Math.floor((diferencia % 60000) / 1000);
+  const sorpresa = sorpresas[dia - 1];
 
-  countdown.textContent = dias > 0
-    ? `La próxima sorpresa llega en ${dias}d ${horas}h ${minutos}m`
-    : `La próxima sorpresa se abre en ${horas}h ${minutos}m ${segundos}s`;
+  document.getElementById("modal-emoji").textContent =
+    sorpresa.emoji;
+
+  document.getElementById("modal-day").textContent =
+    `DÍA ${dia} · DICIEMBRE`;
+
+  document.getElementById("modal-title").textContent =
+    sorpresa.titulo;
+
+  document.getElementById("modal-message").textContent =
+    sorpresa.mensaje;
+
+  modal.classList.add("show");
+
+  modal.setAttribute("aria-hidden", "false");
+
+  document.getElementById("close-modal").focus();
+
 }
 
-document.getElementById("close-modal").addEventListener("click", cerrarModal);
-document.getElementById("modal-done").addEventListener("click", cerrarModal);
+// ==========================================
+// CERRAR LA VENTANA DE SORPRESAS
+// ==========================================
+
+function cerrarModal() {
+
+  modal.classList.remove("show");
+
+  modal.setAttribute("aria-hidden", "true");
+
+}
+
+// ==========================================
+// FECHA Y CONTADOR REGRESIVO
+// ==========================================
+
+function actualizarFechaYContador() {
+
+  const ahora = new Date();
+
+  document.getElementById("today-date").textContent =
+    ahora.toLocaleDateString("es-NI", {
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    });
+
+  let siguienteDia = null;
+
+  for (let dia = 1; dia <= 24; dia++) {
+
+    if (!estaDesbloqueado(dia)) {
+
+      siguienteDia = dia;
+
+      break;
+
+    }
+
+  }
+
+  // Cuando se hayan desbloqueado las 24 sorpresas.
+
+  if (siguienteDia === null) {
+
+    countdown.textContent =
+      "¡Todas las sorpresas están abiertas! Feliz Navidad, Oney ❤️";
+
+    return;
+
+  }
+
+  const siguienteApertura = obtenerFecha(siguienteDia);
+
+  const diferencia = Math.max(
+    0,
+    siguienteApertura.getTime() - ahora.getTime()
+  );
+
+  const dias = Math.floor(
+    diferencia / 86400000
+  );
+
+  const horas = Math.floor(
+    (diferencia % 86400000) / 3600000
+  );
+
+  const minutos = Math.floor(
+    (diferencia % 3600000) / 60000
+  );
+
+  const segundos = Math.floor(
+    (diferencia % 60000) / 1000
+  );
+
+  if (dias > 0) {
+
+    countdown.textContent =
+      `La próxima sorpresa se abre en ${dias}d ${horas}h ${minutos}m`;
+
+  } else {
+
+    countdown.textContent =
+      `La próxima sorpresa se abre en ${horas}h ${minutos}m ${segundos}s`;
+
+  }
+
+}
+
+// ==========================================
+// EVENTOS DE LOS BOTONES
+// ==========================================
+
+document.getElementById("close-modal")
+  .addEventListener("click", cerrarModal);
+
+document.getElementById("modal-done")
+  .addEventListener("click", cerrarModal);
+
 modal.addEventListener("click", (evento) => {
-  if (evento.target === modal) cerrarModal();
-});
-document.addEventListener("keydown", (evento) => {
-  if (evento.key === "Escape" && modal.classList.contains("show")) cerrarModal();
+
+  if (evento.target === modal) {
+    cerrarModal();
+  }
+
 });
 
+document.addEventListener("keydown", (evento) => {
+
+  if (
+    evento.key === "Escape" &&
+    modal.classList.contains("show")
+  ) {
+
+    cerrarModal();
+
+  }
+
+});
+
+// ==========================================
+// INICIAR CALENDARIO
+// ==========================================
+
 crearCalendario();
+
 actualizarFechaYContador();
+
+// Actualizar cada segundo para mantener el contador
+// y desbloquear automáticamente las nuevas casillas.
+
 setInterval(() => {
-  // Recalcula los bloqueos al llegar la medianoche aunque la página siga abierta.
+
   crearCalendario();
+
   actualizarFechaYContador();
+
 }, 1000);
